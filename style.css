@@ -104,9 +104,73 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-.logo-text p {
-  font-size: 14px;
-  color: var(--text-muted);
+.logo-sub {
+  margin-top: 4px;
+}
+
+/* Cloud Status Badge */
+.cloud-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.cloud-badge.online {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.cloud-badge.offline {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.cloud-badge.syncing {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.cloud-badge.syncing .status-dot {
+  animation: pulseDot 1s infinite alternate;
+}
+
+@keyframes pulseDot {
+  from { opacity: 0.3; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1.2); }
+}
+
+.btn-sync-icon {
+  background: transparent;
+  border: none;
+  color: currentColor;
+  cursor: pointer;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  margin-left: 2px;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.btn-sync-icon:hover {
+  transform: rotate(180deg);
 }
 
 /* Buttons */
@@ -576,7 +640,6 @@ body {
 .price-input-wrapper input {
   width: 100%;
   padding-right: 36px;
-
   font-weight: 600;
   font-size: 16px;
   color: var(--accent);
@@ -753,6 +816,14 @@ body {
 
 .toast.info i {
   color: var(--primary);
+}
+
+.toast.error {
+  border-left-color: var(--danger);
+}
+
+.toast.error i {
+  color: var(--danger);
 }
 
 @keyframes toastIn {
