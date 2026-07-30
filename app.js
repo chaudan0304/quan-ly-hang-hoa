@@ -103,10 +103,6 @@ const btnTogglePassword = document.getElementById('btnTogglePassword');
 const btnCloseAdminModal = document.getElementById('btnCloseAdminModal');
 const btnCancelAdminLogin = document.getElementById('btnCancelAdminLogin');
 
-// Cloud Status Badge Elements
-const cloudStatus = document.getElementById('cloudStatus');
-const cloudStatusText = document.getElementById('cloudStatusText');
-const btnSyncNow = document.getElementById('btnSyncNow');
 
 // Export / Import Elements
 const btnExportData = document.getElementById('btnExportData');
@@ -165,13 +161,10 @@ function initApp() {
   loadAdminState();
   loadProducts();
   setupEventListeners();
-  setupNetworkListeners();
   render();
 
   if (navigator.onLine) {
     fetchLatestFromCloud();
-  } else {
-    updateCloudStatusUI('offline');
   }
 }
 
@@ -208,14 +201,6 @@ function saveProductsLocally() {
 function saveAndSyncProducts(actionType = 'update') {
   saveProductsLocally();
   render();
-
-  if (navigator.onLine) {
-    pushLocalToCloud();
-  } else {
-    localStorage.setItem(PENDING_SYNC_KEY, 'true');
-    updateCloudStatusUI('offline');
-    showToast('Đã lưu trên máy (Sẽ tự đồng bộ Đám mây khi có mạng)', 'info');
-  }
 }
 
 // ==========================================
@@ -351,72 +336,13 @@ function importDataJSON(event) {
 // Cloud Sync Engine
 // ==========================================
 
-function setupNetworkListeners() {
-  window.addEventListener('online', () => {
-    showToast('Đã khôi phục kết nối internet! Đang đồng bộ...', 'info');
-    pushLocalToCloud();
-  });
-
-  window.addEventListener('offline', () => {
-    updateCloudStatusUI('offline');
-    showToast('Chuyển sang chế độ ngoại tuyến (Offline)', 'info');
-  });
-
-  btnSyncNow.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (!navigator.onLine) {
-      showToast('Đang không có kết nối internet!', 'error');
-      return;
-    }
-    pushLocalToCloud(true);
-  });
-}
-
-function updateCloudStatusUI(state) {
-  cloudStatus.className = 'cloud-badge ' + state;
-  if (state === 'online') {
-    cloudStatusText.textContent = 'Đám mây: Đã đồng bộ';
-  } else if (state === 'offline') {
-    cloudStatusText.textContent = 'Ngoại tuyến (Offline)';
-  } else if (state === 'syncing') {
-    cloudStatusText.textContent = 'Đang đồng bộ...';
-  }
-}
-
-async function pushLocalToCloud(isManual = false) {
-  if (isSyncing) return;
-  isSyncing = true;
-  updateCloudStatusUI('syncing');
-
-  try {
-    localStorage.setItem('quanlyhanghoa_cloud_snapshot', JSON.stringify(products));
-    localStorage.removeItem(PENDING_SYNC_KEY);
-
-    await new Promise(r => setTimeout(r, 600));
-
-    updateCloudStatusUI('online');
-    if (isManual) {
-      showToast('Đồng bộ Đám mây thành công!');
-    }
-  } catch (err) {
-    console.warn('Cloud push warning:', err);
-    updateCloudStatusUI('offline');
-  } finally {
-    isSyncing = false;
-  }
-}
-
 async function fetchLatestFromCloud() {
   if (!navigator.onLine) return;
   try {
-    updateCloudStatusUI('syncing');
-    
-    // Attempt to fetch latest products.json from GitHub / Server
     const response = await fetch('./products.json?t=' + Date.now(), { cache: 'no-store' });
     if (response.ok) {
       const serverItems = await response.json();
       if (Array.isArray(serverItems) && serverItems.length > 0) {
-        // Merge with local storage
         const hasCustomData = localStorage.getItem(STORAGE_KEY);
         if (!hasCustomData) {
           products = serverItems;
@@ -425,20 +351,8 @@ async function fetchLatestFromCloud() {
         }
       }
     }
-
-    const cloudCache = localStorage.getItem('quanlyhanghoa_cloud_snapshot');
-    if (cloudCache && !localStorage.getItem(PENDING_SYNC_KEY)) {
-      const cloudItems = JSON.parse(cloudCache);
-      if (Array.isArray(cloudItems) && cloudItems.length > 0) {
-        products = cloudItems;
-        saveProductsLocally();
-        render();
-      }
-    }
-    updateCloudStatusUI('online');
   } catch (err) {
-    console.warn('Cloud fetch warning:', err);
-    updateCloudStatusUI('offline');
+    console.warn('Fetch products.json warning:', err);
   }
 }
 
