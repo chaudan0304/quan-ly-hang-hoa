@@ -410,6 +410,22 @@ async function fetchLatestFromCloud() {
   if (!navigator.onLine) return;
   try {
     updateCloudStatusUI('syncing');
+    
+    // Attempt to fetch latest products.json from GitHub / Server
+    const response = await fetch('./products.json?t=' + Date.now(), { cache: 'no-store' });
+    if (response.ok) {
+      const serverItems = await response.json();
+      if (Array.isArray(serverItems) && serverItems.length > 0) {
+        // Merge with local storage
+        const hasCustomData = localStorage.getItem(STORAGE_KEY);
+        if (!hasCustomData) {
+          products = serverItems;
+          saveProductsLocally();
+          render();
+        }
+      }
+    }
+
     const cloudCache = localStorage.getItem('quanlyhanghoa_cloud_snapshot');
     if (cloudCache && !localStorage.getItem(PENDING_SYNC_KEY)) {
       const cloudItems = JSON.parse(cloudCache);

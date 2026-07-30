@@ -1,0 +1,44 @@
+[
+  {
+    "id": "prod_luoc",
+    "name": "Lược chải tóc cao cấp",
+    "price": 15000,
+    "image": "assets/luoc.png",
+    "isOutOfStock": false
+  },
+  {
+    "id": "prod_bam_mong",
+    "name": "Bấm móng tay thép không gỉ",
+    "price": 20000,
+    "image": "assets/bam_mong_tay.png",
+    "isOutOfStock": false
+  },
+  {
+    "id": "prod_non_la",
+    "name": "Nón lá truyền thống",
+    "price": 45000,
+    "image": "assets/non_la.png",
+    "isOutOfStock": false
+  },
+  {
+    "id": "prod_khan_mat",
+    "name": "Khăn mặt cotton mềm mại",
+    "price": 25000,
+    "image": "assets/khan_mat.png",
+    "isOutOfStock": false
+  },
+  {
+    "id": "prod_tat",
+    "name": "Tất / Vớ cổ ngắn",
+    "price": 12000,
+    "image": "assets/tat_vo.png",
+    "isOutOfStock": false
+  },
+  {
+    "id": "prod_day_buoc",
+    "name": "Bộ dây buộc tóc nhiều màu",
+    "price": 5000,
+    "image": "assets/day_buoc_toc.png",
+    "isOutOfStock": false
+  }
+]
