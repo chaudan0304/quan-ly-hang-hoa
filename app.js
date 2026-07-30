@@ -8,14 +8,11 @@
  * - Add & Delete Goods
  * - PWA Service Worker Registration for Offline Usage
  * - Cloud Sync Engine (Auto-sync when online, LocalStorage fallback when offline)
+ * - Export & Import JSON Backup Data
  */
 
 const STORAGE_KEY = 'quanlyhanghoa_items_v2';
 const PENDING_SYNC_KEY = 'quanlyhanghoa_pending_sync';
-
-// Cloud Sync Endpoint Config (Restful Cloud KV endpoint)
-const CLOUD_SYNC_URL_KEY = 'quanlyhanghoa_cloud_url';
-let cloudSyncUrl = localStorage.getItem(CLOUD_SYNC_URL_KEY) || 'https://api.restful-api.dev/objects/quan-ly-hang-hoa-store';
 
 // Custom User Goods Dataset
 const DEFAULT_PRODUCTS = [
@@ -78,6 +75,11 @@ const cloudStatus = document.getElementById('cloudStatus');
 const cloudStatusText = document.getElementById('cloudStatusText');
 const btnSyncNow = document.getElementById('btnSyncNow');
 
+// Export / Import Elements
+const btnExportData = document.getElementById('btnExportData');
+const btnImportData = document.getElementById('btnImportData');
+const importFileInput = document.getElementById('importFileInput');
+
 // Modal Elements
 const productModal = document.getElementById('productModal');
 const productForm = document.getElementById('productForm');
@@ -132,7 +134,6 @@ function initApp() {
   setupNetworkListeners();
   render();
 
-  // Try initial cloud sync if online
   if (navigator.onLine) {
     fetchLatestFromCloud();
   } else {
@@ -180,6 +181,48 @@ function saveAndSyncProducts(actionType = 'update') {
 }
 
 // ==========================================
+// Export & Import Backup Helpers
+// ==========================================
+
+function exportDataJSON() {
+  try {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `danh-sach-hang-hoa_${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    showToast('Đã xuất file sao lưu dữ liệu thành công!');
+  } catch (err) {
+    showToast('Lỗi khi xuất dữ liệu', 'error');
+  }
+}
+
+function importDataJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importedData = JSON.parse(e.target.result);
+      if (Array.isArray(importedData)) {
+        products = importedData;
+        saveAndSyncProducts('import');
+        showToast('Đã nhập thành công ' + products.length + ' hàng hóa từ file!');
+      } else {
+        showToast('File dữ liệu không đúng định dạng', 'error');
+      }
+    } catch (err) {
+      showToast('Không thể đọc file JSON', 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ==========================================
 // Cloud Sync Engine
 // ==========================================
 
@@ -222,11 +265,9 @@ async function pushLocalToCloud(isManual = false) {
   updateCloudStatusUI('syncing');
 
   try {
-    // Save snapshot in local storage cloud cache
     localStorage.setItem('quanlyhanghoa_cloud_snapshot', JSON.stringify(products));
     localStorage.removeItem(PENDING_SYNC_KEY);
 
-    // Simulate network sync completion
     await new Promise(r => setTimeout(r, 600));
 
     updateCloudStatusUI('online');
@@ -408,7 +449,6 @@ function openEditModal(id) {
   
   updatePriceHint(item.price);
 
-  // Check if image is URL or Base64/Asset path
   if (item.image && (item.image.startsWith('http://') || item.image.startsWith('https://'))) {
     switchTab('url');
     productImageUrlInput.value = item.image;
@@ -452,7 +492,7 @@ function setPreviewImage(src) {
   if (src && src.trim() !== '') {
     imagePreview.src = src;
     imagePreview.classList.remove('hidden');
-    previewPlaceholder.classList.add('hidden');
+    previewPlaceholder.classList.remove('hidden');
   } else {
     clearPreview();
   }
@@ -548,6 +588,11 @@ function confirmDelete() {
 // ==========================================
 
 function setupEventListeners() {
+  // Export & Import Buttons
+  btnExportData.addEventListener('click', exportDataJSON);
+  btnImportData.addEventListener('click', () => importFileInput.click());
+  importFileInput.addEventListener('change', importDataJSON);
+
   // Search Events
   searchInput.addEventListener('input', render);
   btnClearSearch.addEventListener('click', () => {

@@ -21,7 +21,7 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Custom Stylesheet with Cache-Buster -->
-  <link rel="stylesheet" href="style.css?v=2.0">
+  <link rel="stylesheet" href="style.css?v=2.1">
 </head>
 <body>
   <!-- App Container -->
@@ -47,8 +47,17 @@
       </div>
 
       <div class="header-actions">
+        <!-- Export / Import Buttons for instant manual sync -->
+        <button id="btnExportData" class="btn btn-secondary btn-sm" title="Xuất file dữ liệu để gửi máy khác">
+          <i class="fa-solid fa-download"></i> Xuất File
+        </button>
+        <button id="btnImportData" class="btn btn-secondary btn-sm" title="Nhập file dữ liệu từ máy khác">
+          <i class="fa-solid fa-file-import"></i> Nhập File
+        </button>
+        <input type="file" id="importFileInput" accept=".json" class="hidden">
+
         <button id="btnAddProduct" class="btn btn-primary">
-          <i class="fa-solid fa-plus"></i> Thêm Hàng Hóa Mới
+          <i class="fa-solid fa-plus"></i> Thêm Mới
         </button>
       </div>
     </header>
@@ -206,7 +215,7 @@
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Main JavaScript File with Cache-Buster -->
-  <script src="app.js?v=2.0"></script>
+  <!-- Main JavaScript File with Cache-Buster v=2.1 -->
+  <script src="app.js?v=2.1"></script>
 </body>
 </html>
