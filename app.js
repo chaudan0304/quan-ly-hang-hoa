@@ -4,6 +4,7 @@
  * - Render Grid & LocalStorage Persistence
  * - Customer Mode (View Only) vs Admin Mode (Edit & Manage)
  * - Admin Authentication (Default PIN: 1234)
+ * - Out of Stock (Hết Hàng) Badge & Quick Toggle Feature
  * - Real-time Search Filter
  * - Edit / Update Price & Image (Base64 file upload & URL support)
  * - Format Currency in VNĐ
@@ -26,37 +27,43 @@ const DEFAULT_PRODUCTS = [
     id: 'prod_luoc',
     name: 'Lược chải tóc cao cấp',
     price: 15000,
-    image: 'assets/luoc.png'
+    image: 'assets/luoc.png',
+    isOutOfStock: false
   },
   {
     id: 'prod_bam_mong',
     name: 'Bấm móng tay thép không gỉ',
     price: 20000,
-    image: 'assets/bam_mong_tay.png'
+    image: 'assets/bam_mong_tay.png',
+    isOutOfStock: false
   },
   {
     id: 'prod_non_la',
     name: 'Nón lá truyền thống',
     price: 45000,
-    image: 'assets/non_la.png'
+    image: 'assets/non_la.png',
+    isOutOfStock: false
   },
   {
     id: 'prod_khan_mat',
     name: 'Khăn mặt cotton mềm mại',
     price: 25000,
-    image: 'assets/khan_mat.png'
+    image: 'assets/khan_mat.png',
+    isOutOfStock: false
   },
   {
     id: 'prod_tat',
     name: 'Tất / Vớ cổ ngắn',
     price: 12000,
-    image: 'assets/tat_vo.png'
+    image: 'assets/tat_vo.png',
+    isOutOfStock: false
   },
   {
     id: 'prod_day_buoc',
     name: 'Bộ dây buộc tóc nhiều màu',
     price: 5000,
-    image: 'assets/day_buoc_toc.png'
+    image: 'assets/day_buoc_toc.png',
+    isOutOfStock: false
   }
 ];
 
@@ -74,6 +81,7 @@ const emptyStateMsg = document.getElementById('emptyStateMsg');
 const searchInput = document.getElementById('searchInput');
 const btnClearSearch = document.getElementById('btnClearSearch');
 const statTotalItems = document.getElementById('statTotalItems');
+const statOutOfStockItems = document.getElementById('statOutOfStockItems');
 const statTotalValue = document.getElementById('statTotalValue');
 const itemCountBadge = document.getElementById('itemCountBadge');
 
@@ -111,6 +119,7 @@ const modalTitle = document.getElementById('modalTitle');
 const productIdInput = document.getElementById('productId');
 const productNameInput = document.getElementById('productName');
 const productPriceInput = document.getElementById('productPrice');
+const productOutOfStockInput = document.getElementById('productOutOfStock');
 const priceFormattedHint = document.getElementById('priceFormattedHint');
 
 const tabUpload = document.getElementById('tabUpload');
@@ -268,6 +277,21 @@ function handleAdminLogout() {
   updateRoleUI();
   render();
   showToast('Đã chuyển sang Chế độ Khách hàng (Chỉ xem giá)', 'info');
+}
+
+// Out of Stock Toggle Helper (Admin Mode)
+function toggleOutOfStock(id) {
+  if (!isAdmin) {
+    openAdminLoginModal();
+    return;
+  }
+  const item = products.find(p => p.id === id);
+  if (!item) return;
+
+  item.isOutOfStock = !item.isOutOfStock;
+  const statusMsg = item.isOutOfStock ? `Đã đánh dấu "${item.name}" là HẾT HÀNG` : `Đã chuyển "${item.name}" thành CÒN HÀNG`;
+  saveAndSyncProducts('toggle_stock');
+  showToast(statusMsg, item.isOutOfStock ? 'info' : 'success');
 }
 
 // ==========================================
@@ -441,13 +465,15 @@ function render() {
 
   // Update Stats
   const totalItems = products.length;
+  const outOfStockCount = products.filter(p => p.isOutOfStock).length;
   const totalVal = products.reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
+
   statTotalItems.textContent = totalItems;
+  statOutOfStockItems.textContent = outOfStockCount;
   statTotalValue.textContent = formatVND(totalVal);
 
   itemCountBadge.textContent = `${filteredProducts.length} sản phẩm`;
 
-  // Toggle clear search button visibility
   if (query.length > 0) {
     btnClearSearch.classList.remove('hidden');
   } else {
@@ -471,9 +497,12 @@ function render() {
   // Render Cards Grid
   productGrid.innerHTML = filteredProducts.map(item => {
     const hasImg = item.image && item.image.trim() !== '';
+    const isOut = Boolean(item.isOutOfStock);
+
     return `
-      <div class="product-card" data-id="${item.id}">
+      <div class="product-card ${isOut ? 'is-out-of-stock' : ''}" data-id="${item.id}">
         <div class="card-img-wrapper">
+          ${isOut ? `<span class="stock-tag-overlay out"><i class="fa-solid fa-ban"></i> HẾT HÀNG</span>` : ''}
           ${hasImg ? 
             `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'no-image-fallback\\'><i class=\\'fa-solid fa-image-slash\\'></i><span>Không tải được ảnh</span></div>';">` : 
             `<div class="no-image-fallback">
@@ -484,18 +513,25 @@ function render() {
         </div>
         <div class="card-content">
           <h3 class="product-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h3>
-          <div class="price-tag">
-            <i class="fa-solid fa-tag"></i>
-            <span class="price-amount">${formatVND(item.price)}</span>
+          <div class="price-row">
+            <div class="price-tag ${isOut ? 'out-of-stock-tag' : ''}">
+              <i class="fa-solid ${isOut ? 'fa-circle-xmark' : 'fa-tag'}"></i>
+              <span class="price-amount">${isOut ? 'HẾT HÀNG (' + formatVND(item.price) + ')' : formatVND(item.price)}</span>
+            </div>
           </div>
           ${isAdmin ? `
             <div class="card-actions">
-              <button class="btn-card-action btn-card-edit" onclick="openEditModal('${item.id}')">
-                <i class="fa-solid fa-pen"></i> Sửa giá & ảnh
+              <button class="btn-card-action btn-card-stock ${isOut ? 'is-out' : 'is-in'}" onclick="toggleOutOfStock('${item.id}')">
+                <i class="fa-solid ${isOut ? 'fa-box-open' : 'fa-ban'}"></i> ${isOut ? 'Chuyển sang CÒN HÀNG' : 'Đánh dấu HẾT HÀNG'}
               </button>
-              <button class="btn-card-action btn-card-delete" onclick="openDeleteModal('${item.id}')">
-                <i class="fa-solid fa-trash"></i> Xóa
-              </button>
+              <div class="card-actions-row">
+                <button class="btn-card-action btn-card-edit" onclick="openEditModal('${item.id}')">
+                  <i class="fa-solid fa-pen"></i> Sửa giá & ảnh
+                </button>
+                <button class="btn-card-action btn-card-delete" onclick="openDeleteModal('${item.id}')">
+                  <i class="fa-solid fa-trash"></i> Xóa
+                </button>
+              </div>
             </div>
           ` : ''}
         </div>
@@ -530,6 +566,7 @@ function openAddModal() {
   productNameInput.value = '';
   productPriceInput.value = '';
   productImageUrlInput.value = '';
+  productOutOfStockInput.checked = false;
   editingImageBase64 = '';
   
   updatePriceHint(0);
@@ -552,6 +589,7 @@ function openEditModal(id) {
   productIdInput.value = item.id;
   productNameInput.value = item.name;
   productPriceInput.value = item.price;
+  productOutOfStockInput.checked = Boolean(item.isOutOfStock);
   
   updatePriceHint(item.price);
 
@@ -614,7 +652,7 @@ function updatePriceHint(val) {
   priceFormattedHint.textContent = `Định dạng hiển thị: ${formatVND(val)}`;
 }
 
-// Handle Form Submission (Save Price & Image)
+// Handle Form Submission (Save Price & Image & Stock Status)
 function handleFormSubmit(e) {
   e.preventDefault();
 
@@ -626,6 +664,7 @@ function handleFormSubmit(e) {
   const id = productIdInput.value;
   const name = productNameInput.value.trim();
   const price = Number(productPriceInput.value) || 0;
+  const isOutOfStock = productOutOfStockInput.checked;
 
   let finalImage = '';
   if (tabUpload.classList.contains('active')) {
@@ -647,7 +686,8 @@ function handleFormSubmit(e) {
         ...products[index],
         name,
         price,
-        image: finalImage
+        image: finalImage,
+        isOutOfStock
       };
       showToast(`Đã cập nhật hàng hóa "${name}" thành công!`);
     }
@@ -657,7 +697,8 @@ function handleFormSubmit(e) {
       id: generateId(),
       name,
       price,
-      image: finalImage
+      image: finalImage,
+      isOutOfStock
     };
     products.unshift(newItem);
     showToast(`Đã thêm mới hàng hóa "${name}"!`);
@@ -786,6 +827,7 @@ function setupEventListeners() {
 // Global functions for inline onclick handlers
 window.openEditModal = openEditModal;
 window.openDeleteModal = openDeleteModal;
+window.toggleOutOfStock = toggleOutOfStock;
 
 // Run App
 document.addEventListener('DOMContentLoaded', initApp);

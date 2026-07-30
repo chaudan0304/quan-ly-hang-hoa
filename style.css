@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Quản Lý Hàng Hóa - Modern Design System & Stylesheet (v3.0 Admin & Customer Mode)
+   Quản Lý Hàng Hóa - Modern Design System & Stylesheet (v3.2 Out of Stock)
    ========================================================================== */
 
 :root {
@@ -369,6 +369,10 @@ body {
   font-family: 'Outfit', sans-serif;
 }
 
+.stat-value.stat-danger {
+  color: var(--danger);
+}
+
 /* Main Section */
 .section-title {
   display: flex;
@@ -416,6 +420,36 @@ body {
   transform: translateY(-4px);
   border-color: rgba(59, 130, 246, 0.5);
   box-shadow: var(--shadow-lg);
+}
+
+/* Out of Stock Card State */
+.product-card.is-out-of-stock {
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.product-card.is-out-of-stock .card-img-wrapper img {
+  filter: grayscale(40%);
+  opacity: 0.7;
+}
+
+.stock-tag-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 5;
+  box-shadow: var(--shadow-md);
+}
+
+.stock-tag-overlay.out {
+  background: rgba(239, 68, 68, 0.95);
+  color: #ffffff;
+  border: 1px solid #ef4444;
 }
 
 .card-img-wrapper {
@@ -472,6 +506,14 @@ body {
   overflow: hidden;
 }
 
+.price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
 .price-tag {
   background: rgba(6, 182, 212, 0.1);
   border: 1px solid rgba(6, 182, 212, 0.25);
@@ -481,7 +523,16 @@ body {
   align-items: center;
   gap: 6px;
   width: fit-content;
-  margin-bottom: 16px;
+}
+
+.price-tag.out-of-stock-tag {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.price-tag.out-of-stock-tag i,
+.price-tag.out-of-stock-tag .price-amount {
+  color: #f87171;
 }
 
 .price-tag i {
@@ -498,10 +549,16 @@ body {
 
 .card-actions {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
   margin-top: auto;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-actions-row {
+  display: flex;
+  gap: 8px;
 }
 
 .btn-card-action {
@@ -519,6 +576,32 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
+}
+
+.btn-card-stock {
+  width: 100%;
+}
+
+.btn-card-stock.is-out {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.btn-card-stock.is-out:hover {
+  background: #10b981;
+  color: #fff;
+}
+
+.btn-card-stock.is-in {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-card-stock.is-in:hover {
+  background: #ef4444;
+  color: #fff;
 }
 
 .btn-card-edit:hover {
@@ -685,6 +768,42 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* Custom Checkbox Group */
+.checkbox-group {
+  margin-top: 4px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-main);
+  background: var(--bg-dark);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
+}
+
+.checkbox-label:hover {
+  border-color: var(--danger);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--danger);
+  cursor: pointer;
+}
+
+.text-danger {
+  color: var(--danger);
 }
 
 .form-group label {

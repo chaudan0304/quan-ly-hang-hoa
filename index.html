@@ -21,7 +21,7 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Custom Stylesheet with Cache-Buster -->
-  <link rel="stylesheet" href="style.css?v=3.1">
+  <link rel="stylesheet" href="style.css?v=3.2">
 </head>
 <body>
   <!-- App Container -->
@@ -95,6 +95,10 @@
           <span id="statTotalItems" class="stat-value">0</span>
         </div>
         <div class="stat-card">
+          <span class="stat-label"><i class="fa-solid fa-ban"></i> Hàng Hết</span>
+          <span id="statOutOfStockItems" class="stat-value stat-danger">0</span>
+        </div>
+        <div class="stat-card">
           <span class="stat-label"><i class="fa-solid fa-coins"></i> Tổng giá trị</span>
           <span id="statTotalValue" class="stat-value">0 đ</span>
         </div>
@@ -150,7 +154,6 @@
               <i class="fa-solid fa-eye"></i>
             </button>
           </div>
-
         </div>
 
         <div class="modal-footer">
@@ -188,6 +191,15 @@
             <span class="currency-symbol">đ</span>
           </div>
           <small id="priceFormattedHint" class="price-hint">Định dạng: 0 đ</small>
+        </div>
+
+        <!-- Out of Stock Checkbox Switch -->
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label" for="productOutOfStock">
+            <input type="checkbox" id="productOutOfStock">
+            <span class="checkbox-custom"></span>
+            <span><i class="fa-solid fa-circle-exclamation text-danger"></i> Đánh dấu mặt hàng này là <strong>HẾT HÀNG</strong></span>
+          </label>
         </div>
 
         <!-- Image Input Section -->
@@ -262,7 +274,7 @@
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Main JavaScript File with Cache-Buster v=3.1 -->
-  <script src="app.js?v=3.1"></script>
+  <!-- Main JavaScript File with Cache-Buster v=3.2 -->
+  <script src="app.js?v=3.2"></script>
 </body>
 </html>
