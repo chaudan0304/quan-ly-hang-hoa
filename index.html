@@ -21,7 +21,7 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Custom Stylesheet with Cache-Buster -->
-  <link rel="stylesheet" href="style.css?v=3.2">
+  <link rel="stylesheet" href="style.css?v=3.3">
 </head>
 <body>
   <!-- App Container -->
@@ -98,8 +98,9 @@
           <span class="stat-label"><i class="fa-solid fa-ban"></i> Hàng Hết</span>
           <span id="statOutOfStockItems" class="stat-value stat-danger">0</span>
         </div>
-        <div class="stat-card">
-          <span class="stat-label"><i class="fa-solid fa-coins"></i> Tổng giá trị</span>
+        <!-- Total Value Card (Admin Only - Hidden in Customer Mode) -->
+        <div id="statTotalValueCard" class="stat-card admin-only hidden">
+          <span class="stat-label"><i class="fa-solid fa-coins"></i> Tổng giá trị kho</span>
           <span id="statTotalValue" class="stat-value">0 đ</span>
         </div>
       </div>
@@ -274,7 +275,7 @@
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Main JavaScript File with Cache-Buster v=3.2 -->
-  <script src="app.js?v=3.2"></script>
+  <!-- Main JavaScript File with Cache-Buster v=3.3 -->
+  <script src="app.js?v=3.3"></script>
 </body>
 </html>

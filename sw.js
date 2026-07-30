@@ -3,14 +3,14 @@
  * Enables complete offline usage on mobile phones without internet connection.
  */
 
-const CACHE_NAME = 'quan-ly-hang-hoa-v3.2';
+const CACHE_NAME = 'quan-ly-hang-hoa-v3.3';
 
 // Static files to cache immediately
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './style.css?v=3.2',
-  './app.js?v=3.2',
+  './style.css?v=3.3',
+  './app.js?v=3.3',
   './manifest.json',
   './assets/luoc.png',
   './assets/bam_mong_tay.png',

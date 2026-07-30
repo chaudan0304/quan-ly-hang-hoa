@@ -83,6 +83,7 @@ const btnClearSearch = document.getElementById('btnClearSearch');
 const statTotalItems = document.getElementById('statTotalItems');
 const statOutOfStockItems = document.getElementById('statOutOfStockItems');
 const statTotalValue = document.getElementById('statTotalValue');
+const statTotalValueCard = document.getElementById('statTotalValueCard');
 const itemCountBadge = document.getElementById('itemCountBadge');
 
 // Role & Admin Elements
@@ -231,6 +232,7 @@ function updateRoleUI() {
     btnLogoutAdmin.classList.remove('hidden');
     adminControls.classList.remove('hidden');
     btnEmptyAdd.classList.remove('hidden');
+    if (statTotalValueCard) statTotalValueCard.classList.remove('hidden');
   } else {
     roleBadge.className = 'role-badge customer';
     roleIcon.className = 'fa-solid fa-user-tag';
@@ -240,6 +242,7 @@ function updateRoleUI() {
     btnLogoutAdmin.classList.add('hidden');
     adminControls.classList.add('hidden');
     btnEmptyAdd.classList.add('hidden');
+    if (statTotalValueCard) statTotalValueCard.classList.add('hidden');
   }
 }
 
