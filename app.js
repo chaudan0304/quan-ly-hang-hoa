@@ -6,6 +6,7 @@
  * - Edit / Update Price & Image (Base64 file upload & URL support)
  * - Format Currency in VNĐ
  * - Add & Delete Goods
+ * - PWA Service Worker Registration for Offline Usage
  */
 
 const STORAGE_KEY = 'quanlyhanghoa_items_v2';
@@ -96,6 +97,18 @@ const btnCancelDelete = document.getElementById('btnCancelDelete');
 const btnConfirmDelete = document.getElementById('btnConfirmDelete');
 
 const toastContainer = document.getElementById('toastContainer');
+
+// ==========================================
+// Service Worker Registration for PWA Offline
+// ==========================================
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => console.log('[PWA] ServiceWorker registered scope:', reg.scope))
+      .catch((err) => console.warn('[PWA] ServiceWorker failed:', err));
+  });
+}
 
 // ==========================================
 // Initialization & LocalStorage Helpers
