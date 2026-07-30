@@ -3,14 +3,14 @@
  * Enables complete offline usage on mobile phones without internet connection.
  */
 
-const CACHE_NAME = 'quan-ly-hang-hoa-v1';
+const CACHE_NAME = 'quan-ly-hang-hoa-v2.0';
 
 // Static files to cache immediately
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './style.css',
-  './app.js',
+  './style.css?v=2.0',
+  './app.js?v=2.0',
   './manifest.json',
   './assets/luoc.png',
   './assets/bam_mong_tay.png',
@@ -26,13 +26,14 @@ const ASSETS_TO_CACHE = [
 
 // Install Event - Pre-cache all core assets
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[ServiceWorker] Pre-caching offline assets...');
+      console.log('[ServiceWorker] Pre-caching offline assets v2.0...');
       return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
         console.warn('[ServiceWorker] Some assets failed to pre-cache:', err);
       });
-    }).then(() => self.skipWaiting())
+    })
   );
 });
 
@@ -54,14 +55,11 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event - Cache-First Strategy with Network Fallback
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Return cached file immediately for instant offline load
-        // Also update cache in background if online
         fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => {
@@ -73,7 +71,6 @@ self.addEventListener('fetch', (event) => {
         return cachedResponse;
       }
 
-      // If not in cache, fetch from network and cache it
       return fetch(event.request).then((networkResponse) => {
         if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
           return networkResponse;
@@ -86,7 +83,6 @@ self.addEventListener('fetch', (event) => {
 
         return networkResponse;
       }).catch(() => {
-        // Offline fallback for html pages
         if (event.request.headers.get('accept').includes('text/html')) {
           return caches.match('./index.html');
         }
