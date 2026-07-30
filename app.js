@@ -1,7 +1,7 @@
 /**
- * Quản Lý Hàng Hóa - Main JavaScript Application (v4.1 Updated Master Products List)
+ * Quản Lý Hàng Hóa - Main JavaScript Application (v5.0 Auto-Sync Master 55 Products)
  * Features:
- * - Render Grid & LocalStorage Persistence (55+ Real Products)
+ * - Render Grid & LocalStorage Persistence (Auto-upgrade to 55+ Master Products)
  * - Customer Mode (View Only) vs Admin Mode (Edit & Manage)
  * - Admin Authentication (Default PIN: 1234)
  * - Out of Stock (Hết Hàng) Badge & Quick Toggle Feature
@@ -12,7 +12,7 @@
  * - Export & Import JSON Backup Data
  */
 
-const STORAGE_KEY = 'quanlyhanghoa_items_v3';
+const STORAGE_KEY = 'quanlyhanghoa_items_v5';
 const ADMIN_SESSION_KEY = 'quanlyhanghoa_is_admin';
 const ADMIN_PASSWORD_KEY = 'quanlyhanghoa_admin_pass';
 
@@ -188,9 +188,10 @@ function loadProducts() {
     const data = localStorage.getItem(STORAGE_KEY);
     if (data) {
       const parsed = JSON.parse(data);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed) && parsed.length >= DEFAULT_PRODUCTS.length) {
         products = parsed;
       } else {
+        // Upgrade to full 55 products dataset automatically if local storage has fewer items
         products = [...DEFAULT_PRODUCTS];
         saveProductsLocally();
       }
@@ -357,9 +358,8 @@ async function fetchLatestFromCloud() {
     const response = await fetch('./products.json?t=' + Date.now(), { cache: 'no-store' });
     if (response.ok) {
       const serverItems = await response.json();
-      if (Array.isArray(serverItems) && serverItems.length > 0) {
-        const hasCustomData = localStorage.getItem(STORAGE_KEY);
-        if (!hasCustomData) {
+      if (Array.isArray(serverItems) && serverItems.length >= DEFAULT_PRODUCTS.length) {
+        if (products.length < serverItems.length) {
           products = serverItems;
           saveProductsLocally();
           render();
