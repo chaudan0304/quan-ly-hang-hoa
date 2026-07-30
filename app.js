@@ -1,7 +1,7 @@
 /**
- * Quản Lý Hàng Hóa - Main JavaScript Application
+ * Quản Lý Hàng Hóa - Main JavaScript Application (v4.1 Updated Master Products List)
  * Features:
- * - Render Grid & LocalStorage Persistence
+ * - Render Grid & LocalStorage Persistence (55+ Real Products)
  * - Customer Mode (View Only) vs Admin Mode (Edit & Manage)
  * - Admin Authentication (Default PIN: 1234)
  * - Out of Stock (Hết Hàng) Badge & Quick Toggle Feature
@@ -9,69 +9,79 @@
  * - Edit / Update Price & Image (Base64 file upload & URL support)
  * - Format Currency in VNĐ
  * - PWA Service Worker Registration for Offline Usage
- * - Cloud Sync Engine (Auto-sync when online, LocalStorage fallback when offline)
  * - Export & Import JSON Backup Data
  */
 
-const STORAGE_KEY = 'quanlyhanghoa_items_v2';
-const PENDING_SYNC_KEY = 'quanlyhanghoa_pending_sync';
+const STORAGE_KEY = 'quanlyhanghoa_items_v3';
 const ADMIN_SESSION_KEY = 'quanlyhanghoa_is_admin';
 const ADMIN_PASSWORD_KEY = 'quanlyhanghoa_admin_pass';
 
 // Default Admin Password is "1234"
 const DEFAULT_ADMIN_PASS = '1234';
 
-// Custom User Goods Dataset
+// Updated Master Dataset (55 Products)
 const DEFAULT_PRODUCTS = [
-  {
-    id: 'prod_luoc',
-    name: 'Lược chải tóc cao cấp',
-    price: 15000,
-    image: 'assets/luoc.png',
-    isOutOfStock: false
-  },
-  {
-    id: 'prod_bam_mong',
-    name: 'Bấm móng tay thép không gỉ',
-    price: 20000,
-    image: 'assets/bam_mong_tay.png',
-    isOutOfStock: false
-  },
-  {
-    id: 'prod_non_la',
-    name: 'Nón lá truyền thống',
-    price: 45000,
-    image: 'assets/non_la.png',
-    isOutOfStock: false
-  },
-  {
-    id: 'prod_khan_mat',
-    name: 'Khăn mặt cotton mềm mại',
-    price: 25000,
-    image: 'assets/khan_mat.png',
-    isOutOfStock: false
-  },
-  {
-    id: 'prod_tat',
-    name: 'Tất / Vớ cổ ngắn',
-    price: 12000,
-    image: 'assets/tat_vo.png',
-    isOutOfStock: false
-  },
-  {
-    id: 'prod_day_buoc',
-    name: 'Bộ dây buộc tóc nhiều màu',
-    price: 5000,
-    image: 'assets/day_buoc_toc.png',
-    isOutOfStock: false
-  }
+  { "id": "prod_1785414851829_vtkz2", "name": "Bờm tóc nhựa dẻo", "price": 10000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785414835860_9ob2t", "name": "Ví 2 ngăn", "price": 20000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785414819690_u824c", "name": "Ví nhỏ 1 ngăn", "price": 10000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785414801330_e2m4e", "name": "Thun quần", "price": 2000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785414787238_74coj", "name": "Tăm", "price": 5000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785414763343_j2f6o", "name": "Găng tay rửa bát cỡ L", "price": 17000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785414711730_gm276", "name": "Găng tay rửa bát cỡ S", "price": 12000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785414630472_eeuby", "name": "Găng tay vải đen có cao su", "price": 7000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785414600048_6oi6w", "name": "Găng tay vải đen", "price": 5000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785414576583_4zdwv", "name": "Que lấy ráy tai", "price": 5000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785414550527_fhmtd", "name": "Quạt", "price": 15000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785414525476_skt2x", "name": "Ống tay", "price": 15000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413483663_oviwm", "name": "Bông tắm", "price": 15000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413443753_hyvdg", "name": "Tấm cước rửa bát", "price": 2000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413382199_jt3zt", "name": "Nùi sắt rửa bát", "price": 5000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413349698_r75jb", "name": "Nhíp", "price": 6000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413333600_7gy1x", "name": "Lưới rửa bát", "price": 2000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413286535_3njxg", "name": "Long não", "price": 3000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413268240_pqkgy", "name": "Kim găm", "price": 1000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413206690_zw847", "name": "Khẩu trang thường", "price": 10000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413196205_biwxh", "name": "Khẩu trang tai mèo", "price": 15000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413107569_wf7xo", "name": "Kẹp tăm to", "price": 1000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413092164_85lp8", "name": "Kẹp nơ búi", "price": 25000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413072506_jq8jm", "name": "Kẹp mĩ nhỏ", "price": 2000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785413060628_uyjdt", "name": "Kẹp mĩ to", "price": 3000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785412044850_q8g52", "name": "Kẹp bật to", "price": 3000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785412032986_e4uz6", "name": "Kẹp bật nhỏ", "price": 2000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785411950000_6clcm", "name": "Gương", "price": 10000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785411927584_0qhir", "name": "Dao gọt vỏ", "price": 7000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785411905084_ratq9", "name": "Chỉ may", "price": 2000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785411876918_wsjf3", "name": "Dây buộc tóc thường", "price": 2000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785411809860_091go", "name": "Dây buộc tóc hạt cườm", "price": 2000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785411051062_g4vcv", "name": "Bàn chải nhựa", "price": 5000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785411038698_dh0q2", "name": "Bàn chải gỗ", "price": 5000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785411019770_w199i", "name": "Băng đô", "price": 20000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410754630_2pvn9", "name": "Bông ngoáy tai", "price": 2000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410730966_qjl7n", "name": "Thuốc kiến", "price": 2000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410675449_ad0t2", "name": "Kim may bì", "price": 5000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410665195_ep087", "name": "3 kim may đồ", "price": 1000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410624018_nf5zl", "name": "Dính ruồi", "price": 500, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410614845_pbnki", "name": "Dính chuột", "price": 5000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410594457_zzt65", "name": "Quai nón nhung", "price": 10000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410568451_a7bqj", "name": "Quai nón thường", "price": 5000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410541930_n5bu4", "name": "Nón nhựa", "price": 20000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410505906_ltvna", "name": "Dây buộc tóc nhung", "price": 5000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410431143_ks330", "name": "Khăn tắm to", "price": 30000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410397395_5h63u", "name": "Khăn tắm nhỏ", "price": 20000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410227344_yhhvq", "name": "Nón dừa", "price": 45000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410183797_bolt5", "name": "Bấm móng tay nhỏ", "price": 6000, "image": "", "isOutOfStock": false },
+  { "id": "prod_1785410126455_k8sgc", "name": "Lược dày", "price": 6000, "image": "", "isOutOfStock": false },
+  { "id": "prod_luoc", "name": "Lược thường", "price": 5000, "image": "assets/luoc.png", "isOutOfStock": false },
+  { "id": "prod_bam_mong", "name": "Bấm móng tay to", "price": 10000, "image": "assets/bam_mong_tay.png", "isOutOfStock": false },
+  { "id": "prod_non_la", "name": "Nón Huế", "price": 35000, "image": "assets/non_la.png", "isOutOfStock": false },
+  { "id": "prod_khan_mat", "name": "Khăn mặt", "price": 10000, "image": "assets/khan_mat.png", "isOutOfStock": false },
+  { "id": "prod_day_buoc", "name": "Bộ dây buộc tóc nhiều màu", "price": 500, "image": "assets/day_buoc_toc.png", "isOutOfStock": false }
 ];
 
 // App State
 let products = [];
 let editingImageBase64 = '';
 let itemToDeleteId = null;
-let isSyncing = false;
 let isAdmin = false;
 
 // DOM Element References
@@ -102,7 +112,6 @@ const adminPasswordInput = document.getElementById('adminPassword');
 const btnTogglePassword = document.getElementById('btnTogglePassword');
 const btnCloseAdminModal = document.getElementById('btnCloseAdminModal');
 const btnCancelAdminLogin = document.getElementById('btnCancelAdminLogin');
-
 
 // Export / Import Elements
 const btnExportData = document.getElementById('btnExportData');
@@ -178,7 +187,13 @@ function loadProducts() {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     if (data) {
-      products = JSON.parse(data);
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        products = parsed;
+      } else {
+        products = [...DEFAULT_PRODUCTS];
+        saveProductsLocally();
+      }
     } else {
       products = [...DEFAULT_PRODUCTS];
       saveProductsLocally();
@@ -333,7 +348,7 @@ function importDataJSON(event) {
 }
 
 // ==========================================
-// Cloud Sync Engine
+// Master Dataset Fetcher
 // ==========================================
 
 async function fetchLatestFromCloud() {
