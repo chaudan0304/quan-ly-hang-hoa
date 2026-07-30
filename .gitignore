@@ -1,0 +1,8 @@
+# Node & Vercel temp files
+.vercel
+node_modules
+*.log
+
+# System files
+.DS_Store
+Thumbs.db

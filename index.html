@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Hàng Hóa & Giá Tiền</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- App Container -->
+  <div class="app-container">
+    
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-icon">
+          <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+        <div class="logo-text">
+          <h1>Quản Lý Hàng Hóa</h1>
+          <p>Ghi lại giá tiền & hình ảnh minh họa</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btnAddProduct" class="btn btn-primary">
+          <i class="fa-solid fa-plus"></i> Thêm Hàng Hóa Mới
+        </button>
+      </div>
+    </header>
+
+    <!-- Controls & Search Bar -->
+    <section class="controls-section">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Tìm kiếm tên hàng hóa..." autocomplete="off">
+        <button id="btnClearSearch" class="btn-clear-search hidden" title="Xóa tìm kiếm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <span class="stat-label"><i class="fa-solid fa-box"></i> Tổng hàng hóa</span>
+          <span id="statTotalItems" class="stat-value">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label"><i class="fa-solid fa-coins"></i> Tổng giá trị</span>
+          <span id="statTotalValue" class="stat-value">0 đ</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Product Grid Content -->
+    <main class="main-content">
+      <div class="section-title">
+        <h2 id="gridTitle">Danh Sách Hàng Hóa</h2>
+        <span id="itemCountBadge" class="badge">0 sản phẩm</span>
+      </div>
+
+      <!-- Product Cards Grid -->
+      <div id="productGrid" class="product-grid">
+        <!-- Rendered by app.js -->
+      </div>
+
+      <!-- Empty State View -->
+      <div id="emptyState" class="empty-state hidden">
+        <div class="empty-icon">
+          <i class="fa-solid fa-box-open"></i>
+        </div>
+        <h3>Không tìm thấy hàng hóa nào</h3>
+        <p id="emptyStateMsg">Chưa có hàng hóa trong danh sách hoặc không khớp từ khóa tìm kiếm.</p>
+        <button id="btnEmptyAdd" class="btn btn-secondary">
+          <i class="fa-solid fa-plus"></i> Thêm Hàng Hóa Mới
+        </button>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>© Quản Lý Hàng Hóa — Hỗ trợ lưu trữ LocalStorage & sẵn sàng Deploy GitHub Pages / Vercel</p>
+    </footer>
+  </div>
+
+  <!-- Product Form Modal (Add / Edit) -->
+  <div id="productModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle"><i class="fa-solid fa-pen-to-square"></i> Chỉnh Sửa Hàng Hóa</h3>
+        <button id="btnCloseModal" class="btn-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="productForm" class="modal-body">
+        <input type="hidden" id="productId">
+
+        <!-- Name Input -->
+        <div class="form-group">
+          <label for="productName"><i class="fa-solid fa-tag"></i> Tên hàng hóa <span class="required">*</span></label>
+          <input type="text" id="productName" placeholder="Nhập tên mặt hàng (ví dụ: Điện thoại, Máy tính...)" required>
+        </div>
+
+        <!-- Price Input -->
+        <div class="form-group">
+          <label for="productPrice"><i class="fa-solid fa-money-bill-wave"></i> Giá tiền (VNĐ) <span class="required">*</span></label>
+          <div class="price-input-wrapper">
+            <input type="number" id="productPrice" placeholder="0" min="0" step="500" required>
+            <span class="currency-symbol">đ</span>
+          </div>
+          <small id="priceFormattedHint" class="price-hint">Định dạng: 0 đ</small>
+        </div>
+
+        <!-- Image Input Section -->
+        <div class="form-group">
+          <label><i class="fa-solid fa-image"></i> Hình ảnh minh họa</label>
+          
+          <!-- Image Input Type Selector Tabs -->
+          <div class="image-tabs">
+            <button type="button" id="tabUpload" class="tab-btn active"><i class="fa-solid fa-upload"></i> Tải ảnh từ máy</button>
+            <button type="button" id="tabUrl" class="tab-btn"><i class="fa-solid fa-link"></i> Link URL ảnh</button>
+          </div>
+
+          <!-- File Upload Panel -->
+          <div id="panelUpload" class="tab-panel">
+            <div class="file-drop-area" id="fileDropArea">
+              <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+              <p>Nhấp để chọn ảnh hoặc kéo thả ảnh vào đây</p>
+              <span class="file-info">Hỗ trợ JPG, PNG, WEBP (Tối đa 5MB)</span>
+              <input type="file" id="productImageFile" accept="image/*" class="file-input">
+            </div>
+          </div>
+
+          <!-- Image URL Panel -->
+          <div id="panelUrl" class="tab-panel hidden">
+            <input type="url" id="productImageUrl" placeholder="https://example.com/hinh-anh.jpg">
+          </div>
+
+          <!-- Image Live Preview Area -->
+          <div class="image-preview-container">
+            <span class="preview-label">Xem trước hình ảnh:</span>
+            <div class="preview-box">
+              <img id="imagePreview" src="" alt="Xem trước hình ảnh" class="hidden">
+              <div id="previewPlaceholder" class="preview-placeholder">
+                <i class="fa-solid fa-image"></i>
+                <span>Chưa có hình ảnh</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="modal-footer">
+          <button type="button" id="btnCancelModal" class="btn btn-light">Hủy bỏ</button>
+          <button type="submit" id="btnSaveProduct" class="btn btn-primary">
+            <i class="fa-solid fa-floppy-disk"></i> Lưu Thay Đổi
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div id="deleteModal" class="modal-overlay hidden">
+    <div class="modal-card modal-small">
+      <div class="modal-header danger">
+        <h3><i class="fa-solid fa-triangle-exclamation"></i> Xác nhận xóa</h3>
+        <button id="btnCloseDeleteModal" class="btn-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p>Bạn có chắc chắn muốn xóa hàng hóa <strong id="deleteProductName">...</strong> không?</p>
+        <p class="text-subtle">Hành động này không thể hoàn tác.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="btnCancelDelete" class="btn btn-light">Hủy</button>
+        <button type="button" id="btnConfirmDelete" class="btn btn-danger">
+          <i class="fa-solid fa-trash-can"></i> Đồng Ý Xóa
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Main JavaScript File -->
+  <script src="app.js"></script>
+</body>
+</html>
