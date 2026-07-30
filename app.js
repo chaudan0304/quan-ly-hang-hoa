@@ -2,10 +2,11 @@
  * Quản Lý Hàng Hóa - Main JavaScript Application
  * Features:
  * - Render Grid & LocalStorage Persistence
+ * - Customer Mode (View Only) vs Admin Mode (Edit & Manage)
+ * - Admin Authentication (Default PIN: 1234)
  * - Real-time Search Filter
  * - Edit / Update Price & Image (Base64 file upload & URL support)
  * - Format Currency in VNĐ
- * - Add & Delete Goods
  * - PWA Service Worker Registration for Offline Usage
  * - Cloud Sync Engine (Auto-sync when online, LocalStorage fallback when offline)
  * - Export & Import JSON Backup Data
@@ -13,6 +14,11 @@
 
 const STORAGE_KEY = 'quanlyhanghoa_items_v2';
 const PENDING_SYNC_KEY = 'quanlyhanghoa_pending_sync';
+const ADMIN_SESSION_KEY = 'quanlyhanghoa_is_admin';
+const ADMIN_PASSWORD_KEY = 'quanlyhanghoa_admin_pass';
+
+// Default Admin Password is "1234"
+const DEFAULT_ADMIN_PASS = '1234';
 
 // Custom User Goods Dataset
 const DEFAULT_PRODUCTS = [
@@ -59,6 +65,7 @@ let products = [];
 let editingImageBase64 = '';
 let itemToDeleteId = null;
 let isSyncing = false;
+let isAdmin = false;
 
 // DOM Element References
 const productGrid = document.getElementById('productGrid');
@@ -70,6 +77,23 @@ const statTotalItems = document.getElementById('statTotalItems');
 const statTotalValue = document.getElementById('statTotalValue');
 const itemCountBadge = document.getElementById('itemCountBadge');
 
+// Role & Admin Elements
+const roleBadge = document.getElementById('roleBadge');
+const roleIcon = document.getElementById('roleIcon');
+const roleText = document.getElementById('roleText');
+const btnLoginAdmin = document.getElementById('btnLoginAdmin');
+const btnLogoutAdmin = document.getElementById('btnLogoutAdmin');
+const adminControls = document.getElementById('adminControls');
+const btnEmptyAdd = document.getElementById('btnEmptyAdd');
+
+// Admin Login Modal Elements
+const adminLoginModal = document.getElementById('adminLoginModal');
+const adminLoginForm = document.getElementById('adminLoginForm');
+const adminPasswordInput = document.getElementById('adminPassword');
+const btnTogglePassword = document.getElementById('btnTogglePassword');
+const btnCloseAdminModal = document.getElementById('btnCloseAdminModal');
+const btnCancelAdminLogin = document.getElementById('btnCancelAdminLogin');
+
 // Cloud Status Badge Elements
 const cloudStatus = document.getElementById('cloudStatus');
 const cloudStatusText = document.getElementById('cloudStatusText');
@@ -80,7 +104,7 @@ const btnExportData = document.getElementById('btnExportData');
 const btnImportData = document.getElementById('btnImportData');
 const importFileInput = document.getElementById('importFileInput');
 
-// Modal Elements
+// Product Form Modal Elements
 const productModal = document.getElementById('productModal');
 const productForm = document.getElementById('productForm');
 const modalTitle = document.getElementById('modalTitle');
@@ -99,7 +123,6 @@ const imagePreview = document.getElementById('imagePreview');
 const previewPlaceholder = document.getElementById('previewPlaceholder');
 
 const btnAddProduct = document.getElementById('btnAddProduct');
-const btnEmptyAdd = document.getElementById('btnEmptyAdd');
 const btnCloseModal = document.getElementById('btnCloseModal');
 const btnCancelModal = document.getElementById('btnCancelModal');
 
@@ -129,6 +152,7 @@ if ('serviceWorker' in navigator) {
 // ==========================================
 
 function initApp() {
+  loadAdminState();
   loadProducts();
   setupEventListeners();
   setupNetworkListeners();
@@ -141,13 +165,18 @@ function initApp() {
   }
 }
 
+function loadAdminState() {
+  const sessionAdmin = sessionStorage.getItem(ADMIN_SESSION_KEY);
+  isAdmin = sessionAdmin === 'true';
+  updateRoleUI();
+}
+
 function loadProducts() {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     if (data) {
       products = JSON.parse(data);
     } else {
-      // First time use: load default demo items
       products = [...DEFAULT_PRODUCTS];
       saveProductsLocally();
     }
@@ -166,7 +195,6 @@ function saveProductsLocally() {
   }
 }
 
-// Save & Sync Entry Point
 function saveAndSyncProducts(actionType = 'update') {
   saveProductsLocally();
   render();
@@ -181,10 +209,76 @@ function saveAndSyncProducts(actionType = 'update') {
 }
 
 // ==========================================
+// Admin Authentication Logic
+// ==========================================
+
+function updateRoleUI() {
+  if (isAdmin) {
+    roleBadge.className = 'role-badge admin';
+    roleIcon.className = 'fa-solid fa-user-shield';
+    roleText.textContent = 'Quản trị viên';
+    
+    btnLoginAdmin.classList.add('hidden');
+    btnLogoutAdmin.classList.remove('hidden');
+    adminControls.classList.remove('hidden');
+    btnEmptyAdd.classList.remove('hidden');
+  } else {
+    roleBadge.className = 'role-badge customer';
+    roleIcon.className = 'fa-solid fa-user-tag';
+    roleText.textContent = 'Khách hàng (Chỉ xem giá)';
+    
+    btnLoginAdmin.classList.remove('hidden');
+    btnLogoutAdmin.classList.add('hidden');
+    adminControls.classList.add('hidden');
+    btnEmptyAdd.classList.add('hidden');
+  }
+}
+
+function openAdminLoginModal() {
+  adminPasswordInput.value = '';
+  adminLoginModal.classList.remove('hidden');
+  adminPasswordInput.focus();
+}
+
+function closeAdminLoginModal() {
+  adminLoginModal.classList.add('hidden');
+}
+
+function handleAdminLoginSubmit(e) {
+  e.preventDefault();
+  const inputPass = adminPasswordInput.value.trim();
+  const savedPass = localStorage.getItem(ADMIN_PASSWORD_KEY) || DEFAULT_ADMIN_PASS;
+
+  if (inputPass === savedPass) {
+    isAdmin = true;
+    sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
+    updateRoleUI();
+    render();
+    closeAdminLoginModal();
+    showToast('Đã đăng nhập quyền Quản trị viên thành công!');
+  } else {
+    showToast('Mật khẩu Admin không chính xác!', 'error');
+    adminPasswordInput.focus();
+  }
+}
+
+function handleAdminLogout() {
+  isAdmin = false;
+  sessionStorage.removeItem(ADMIN_SESSION_KEY);
+  updateRoleUI();
+  render();
+  showToast('Đã chuyển sang Chế độ Khách hàng (Chỉ xem giá)', 'info');
+}
+
+// ==========================================
 // Export & Import Backup Helpers
 // ==========================================
 
 function exportDataJSON() {
+  if (!isAdmin) {
+    showToast('Chức năng này chỉ dành cho Quản trị viên!', 'error');
+    return;
+  }
   try {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products, null, 2));
     const downloadAnchor = document.createElement('a');
@@ -200,6 +294,10 @@ function exportDataJSON() {
 }
 
 function importDataJSON(event) {
+  if (!isAdmin) {
+    showToast('Chức năng này chỉ dành cho Quản trị viên!', 'error');
+    return;
+  }
   const file = event.target.files[0];
   if (!file) return;
 
@@ -258,7 +356,6 @@ function updateCloudStatusUI(state) {
   }
 }
 
-// Push local changes to cloud store
 async function pushLocalToCloud(isManual = false) {
   if (isSyncing) return;
   isSyncing = true;
@@ -282,7 +379,6 @@ async function pushLocalToCloud(isManual = false) {
   }
 }
 
-// Fetch latest cloud data on app load if online
 async function fetchLatestFromCloud() {
   if (!navigator.onLine) return;
   try {
@@ -365,7 +461,7 @@ function render() {
     if (query.length > 0) {
       emptyStateMsg.textContent = `Không tìm thấy hàng hóa nào khớp với từ khóa "${query}".`;
     } else {
-      emptyStateMsg.textContent = 'Danh sách hàng hóa hiện đang trống. Hãy thêm sản phẩm đầu tiên!';
+      emptyStateMsg.textContent = 'Danh sách hàng hóa hiện đang trống.';
     }
     return;
   }
@@ -392,14 +488,16 @@ function render() {
             <i class="fa-solid fa-tag"></i>
             <span class="price-amount">${formatVND(item.price)}</span>
           </div>
-          <div class="card-actions">
-            <button class="btn-card-action btn-card-edit" onclick="openEditModal('${item.id}')">
-              <i class="fa-solid fa-pen"></i> Sửa giá & ảnh
-            </button>
-            <button class="btn-card-action btn-card-delete" onclick="openDeleteModal('${item.id}')">
-              <i class="fa-solid fa-trash"></i> Xóa
-            </button>
-          </div>
+          ${isAdmin ? `
+            <div class="card-actions">
+              <button class="btn-card-action btn-card-edit" onclick="openEditModal('${item.id}')">
+                <i class="fa-solid fa-pen"></i> Sửa giá & ảnh
+              </button>
+              <button class="btn-card-action btn-card-delete" onclick="openDeleteModal('${item.id}')">
+                <i class="fa-solid fa-trash"></i> Xóa
+              </button>
+            </div>
+          ` : ''}
         </div>
       </div>
     `;
@@ -419,10 +517,14 @@ function escapeHtml(str) {
 }
 
 // ==========================================
-// Modal & Editing Actions
+// Modal & Editing Actions (Admin Only)
 // ==========================================
 
 function openAddModal() {
+  if (!isAdmin) {
+    openAdminLoginModal();
+    return;
+  }
   modalTitle.innerHTML = '<i class="fa-solid fa-plus"></i> Thêm Hàng Hóa Mới';
   productIdInput.value = '';
   productNameInput.value = '';
@@ -439,6 +541,10 @@ function openAddModal() {
 }
 
 function openEditModal(id) {
+  if (!isAdmin) {
+    openAdminLoginModal();
+    return;
+  }
   const item = products.find(p => p.id === id);
   if (!item) return;
 
@@ -492,7 +598,7 @@ function setPreviewImage(src) {
   if (src && src.trim() !== '') {
     imagePreview.src = src;
     imagePreview.classList.remove('hidden');
-    previewPlaceholder.classList.remove('hidden');
+    previewPlaceholder.classList.add('hidden');
   } else {
     clearPreview();
   }
@@ -511,6 +617,11 @@ function updatePriceHint(val) {
 // Handle Form Submission (Save Price & Image)
 function handleFormSubmit(e) {
   e.preventDefault();
+
+  if (!isAdmin) {
+    showToast('Bạn cần đăng nhập Admin để thực hiện thao tác này', 'error');
+    return;
+  }
 
   const id = productIdInput.value;
   const name = productNameInput.value.trim();
@@ -558,6 +669,10 @@ function handleFormSubmit(e) {
 
 // Delete Confirmation Modal
 function openDeleteModal(id) {
+  if (!isAdmin) {
+    openAdminLoginModal();
+    return;
+  }
   const item = products.find(p => p.id === id);
   if (!item) return;
 
@@ -572,7 +687,7 @@ function closeDeleteModal() {
 }
 
 function confirmDelete() {
-  if (!itemToDeleteId) return;
+  if (!itemToDeleteId || !isAdmin) return;
 
   const item = products.find(p => p.id === itemToDeleteId);
   const name = item ? item.name : 'hàng hóa';
@@ -588,6 +703,20 @@ function confirmDelete() {
 // ==========================================
 
 function setupEventListeners() {
+  // Admin Login / Logout Buttons
+  btnLoginAdmin.addEventListener('click', openAdminLoginModal);
+  btnLogoutAdmin.addEventListener('click', handleAdminLogout);
+  btnCloseAdminModal.addEventListener('click', closeAdminLoginModal);
+  btnCancelAdminLogin.addEventListener('click', closeAdminLoginModal);
+  adminLoginForm.addEventListener('submit', handleAdminLoginSubmit);
+
+  // Toggle Admin Password Visibility
+  btnTogglePassword.addEventListener('click', () => {
+    const isPassword = adminPasswordInput.type === 'password';
+    adminPasswordInput.type = isPassword ? 'text' : 'password';
+    btnTogglePassword.innerHTML = `<i class="fa-solid fa-${isPassword ? 'eye-slash' : 'eye'}"></i>`;
+  });
+
   // Export & Import Buttons
   btnExportData.addEventListener('click', exportDataJSON);
   btnImportData.addEventListener('click', () => importFileInput.click());
@@ -650,6 +779,7 @@ function setupEventListeners() {
   window.addEventListener('click', (e) => {
     if (e.target === productModal) closeModal();
     if (e.target === deleteModal) closeDeleteModal();
+    if (e.target === adminLoginModal) closeAdminLoginModal();
   });
 }
 

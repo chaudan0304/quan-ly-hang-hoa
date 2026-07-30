@@ -21,7 +21,7 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Custom Stylesheet with Cache-Buster -->
-  <link rel="stylesheet" href="style.css?v=2.1">
+  <link rel="stylesheet" href="style.css?v=3.0">
 </head>
 <body>
   <!-- App Container -->
@@ -36,6 +36,12 @@
         <div class="logo-text">
           <h1>Quản Lý Hàng Hóa</h1>
           <div class="logo-sub">
+            <!-- Role Badge (Customer vs Admin) -->
+            <div id="roleBadge" class="role-badge customer">
+              <i id="roleIcon" class="fa-solid fa-user-tag"></i>
+              <span id="roleText">Khách hàng (Chỉ xem giá)</span>
+            </div>
+
             <!-- Cloud Sync Indicator Badge -->
             <div id="cloudStatus" class="cloud-badge online">
               <span class="status-dot"></span>
@@ -47,18 +53,28 @@
       </div>
 
       <div class="header-actions">
-        <!-- Export / Import Buttons for instant manual sync -->
-        <button id="btnExportData" class="btn btn-secondary btn-sm" title="Xuất file dữ liệu để gửi máy khác">
-          <i class="fa-solid fa-download"></i> Xuất File
+        <!-- Admin Toggle Buttons -->
+        <button id="btnLoginAdmin" class="btn btn-secondary btn-sm">
+          <i class="fa-solid fa-lock"></i> Đăng Nhập Admin
         </button>
-        <button id="btnImportData" class="btn btn-secondary btn-sm" title="Nhập file dữ liệu từ máy khác">
-          <i class="fa-solid fa-file-import"></i> Nhập File
+        <button id="btnLogoutAdmin" class="btn btn-light btn-sm hidden">
+          <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất Admin
         </button>
-        <input type="file" id="importFileInput" accept=".json" class="hidden">
 
-        <button id="btnAddProduct" class="btn btn-primary">
-          <i class="fa-solid fa-plus"></i> Thêm Mới
-        </button>
+        <!-- Admin Only Buttons (Hidden in Customer Mode) -->
+        <div id="adminControls" class="admin-controls hidden">
+          <button id="btnExportData" class="btn btn-secondary btn-sm" title="Xuất file dữ liệu để gửi máy khác">
+            <i class="fa-solid fa-download"></i> Xuất File
+          </button>
+          <button id="btnImportData" class="btn btn-secondary btn-sm" title="Nhập file dữ liệu từ máy khác">
+            <i class="fa-solid fa-file-import"></i> Nhập File
+          </button>
+          <input type="file" id="importFileInput" accept=".json" class="hidden">
+
+          <button id="btnAddProduct" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Thêm Mới
+          </button>
+        </div>
       </div>
     </header>
 
@@ -104,7 +120,7 @@
         </div>
         <h3>Không tìm thấy hàng hóa nào</h3>
         <p id="emptyStateMsg">Chưa có hàng hóa trong danh sách hoặc không khớp từ khóa tìm kiếm.</p>
-        <button id="btnEmptyAdd" class="btn btn-secondary">
+        <button id="btnEmptyAdd" class="btn btn-secondary admin-only hidden">
           <i class="fa-solid fa-plus"></i> Thêm Hàng Hóa Mới
         </button>
       </div>
@@ -112,11 +128,42 @@
 
     <!-- Footer -->
     <footer class="app-footer">
-      <p>© Quản Lý Hàng Hóa — Hỗ trợ Tự động đồng bộ Đám mây & Dùng Offline không cần mạng</p>
+      <p>© Quản Lý Hàng Hóa — Chế độ xem giá cho Khách hàng & Quản lý Admin</p>
     </footer>
   </div>
 
-  <!-- Product Form Modal (Add / Edit) -->
+  <!-- Admin Login Modal -->
+  <div id="adminLoginModal" class="modal-overlay hidden">
+    <div class="modal-card modal-small">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-shield-halved"></i> Đăng Nhập Quản Trị Viên</h3>
+        <button id="btnCloseAdminModal" class="btn-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="adminLoginForm" class="modal-body">
+        <p class="modal-desc">Nhập mật khẩu Admin để bật quyền chỉnh sửa giá tiền & hàng hóa.</p>
+        
+        <div class="form-group">
+          <label for="adminPassword"><i class="fa-solid fa-key"></i> Mật khẩu Admin</label>
+          <div class="password-input-wrapper">
+            <input type="password" id="adminPassword" placeholder="Nhập mật khẩu..." required>
+            <button type="button" id="btnTogglePassword" class="btn-toggle-pw" title="Hiện/Ẩn mật khẩu">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <small class="price-hint">Mật khẩu mặc định: <strong>1234</strong></small>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="btnCancelAdminLogin" class="btn btn-light">Hủy</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Product Form Modal (Add / Edit - Admin Only) -->
   <div id="productModal" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
@@ -192,7 +239,7 @@
     </div>
   </div>
 
-  <!-- Delete Confirm Modal -->
+  <!-- Delete Confirm Modal (Admin Only) -->
   <div id="deleteModal" class="modal-overlay hidden">
     <div class="modal-card modal-small">
       <div class="modal-header danger">
@@ -215,7 +262,7 @@
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Main JavaScript File with Cache-Buster v=2.1 -->
-  <script src="app.js?v=2.1"></script>
+  <!-- Main JavaScript File with Cache-Buster v=3.0 -->
+  <script src="app.js?v=3.0"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Quản Lý Hàng Hóa - Modern Design System & Stylesheet
+   Quản Lý Hàng Hóa - Modern Design System & Stylesheet (v3.0 Admin & Customer Mode)
    ========================================================================== */
 
 :root {
@@ -106,6 +106,35 @@ body {
 
 .logo-sub {
   margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Role Badge (Customer vs Admin) */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.role-badge.customer {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--primary);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.role-badge.admin {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
 }
 
 /* Cloud Status Badge */
@@ -173,6 +202,20 @@ body {
   transform: rotate(180deg);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
@@ -188,6 +231,11 @@ body {
   transition: var(--transition);
   outline: none;
   white-space: nowrap;
+}
+
+.btn-sm {
+  padding: 8px 14px;
+  font-size: 13px;
 }
 
 .btn-primary {
@@ -546,7 +594,37 @@ body {
 
 .modal-small {
   max-width: 420px;
-  max-height: auto;
+}
+
+.modal-desc {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.password-input-wrapper {
+  position: relative;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.btn-toggle-pw {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-toggle-pw:hover {
+  color: var(--text-main);
 }
 
 @keyframes modalSlideUp {
@@ -624,7 +702,8 @@ body {
 
 .form-group input[type="text"],
 .form-group input[type="number"],
-.form-group input[type="url"] {
+.form-group input[type="url"],
+.form-group input[type="password"] {
   padding: 11px 14px;
   background: var(--bg-dark);
   border: 1px solid var(--border-color);
@@ -878,6 +957,10 @@ body {
     width: 100%;
   }
   
+  .admin-controls {
+    width: 100%;
+  }
+
   .btn-primary {
     width: 100%;
   }
